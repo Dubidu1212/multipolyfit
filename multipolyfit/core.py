@@ -60,16 +60,20 @@ def multipolyfit(xs, y, deg, full=False, model_out=False, powers_out=False):
     # All combinations of degrees
     powers = map(sum, itertools.combinations_with_replacement(generators, deg))
 
+    #copy itterator to be able to return one
+
+    powers, out_powers = itertools.tee(powers) 
+
     # Raise data to specified degree pattern, stack in order
     A = hstack(asarray([as_tall((xs**p).prod(1)) for p in powers]))
 
-    beta = linalg.lstsq(A, y)[0]
+    beta = linalg.lstsq(A, y, rcond=None)[0]
 
     if model_out:
-        return mk_model(beta, powers)
+        return mk_model(beta, out_powers)
 
     if powers_out:
-        return beta, powers
+        return beta, out_powers
     return beta
 
 def mk_model(beta, powers):
@@ -79,6 +83,10 @@ def mk_model(beta, powers):
     """
     # Create a function that takes in many x values
     # and returns an approximate y value
+
+
+    #convert to list, to use multiple times (slow)
+    powers = list(powers)
     def model(*args):
         num_covariates = len(powers[0]) - 1
         if len(args)!=(num_covariates):
@@ -90,6 +98,8 @@ def mk_model(beta, powers):
 
 def mk_sympy_function(beta, powers):
     from sympy import symbols, Add, Mul, S
+    #cast to list to use multiple times (slow)
+    powers = list(powers)
     num_covariates = len(powers[0]) - 1
     xs = (S.One,) + symbols('x0:%d'%num_covariates)
     return Add(*[coeff * Mul(*[x**deg for x, deg in zip(xs, power)])

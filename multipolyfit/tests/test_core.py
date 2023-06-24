@@ -15,7 +15,7 @@ def test_model():
     y = np.array([2,2,4,4,6])
     model = multipolyfit(xs, y, 2, model_out = True)
 
-    yhat = np.asarray(map(model, xs[:,0], xs[:,1]))
+    yhat = np.asarray(list(map(model, xs[:,0], xs[:,1])))
 
     assert np.linalg.norm(y - yhat) < .0001
 
@@ -28,7 +28,9 @@ def test_sympy():
 
         expr = mk_sympy_function(betas, powers)
         x0, x1 = symbols('x0,x1')
-        symbol_sets = {tuple(sorted(arg.free_symbols)) for arg in expr.args}
+        symbol_sets = {tuple(sorted(arg.free_symbols, key =str)) for arg in expr.args}
+        print(symbol_sets)
         assert symbol_sets == {tuple(), (x0,), (x1,), (x0, x1)}
     except ImportError:
         pass
+test_sympy()
