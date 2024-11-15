@@ -1,4 +1,4 @@
-Multivariate Polynomial Fit
+Fork of Multivariate Polynomial Fit
 ===========================
 
 Holds a python function to perform multivariate polynomial regression in Python
